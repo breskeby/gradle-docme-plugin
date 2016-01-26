@@ -1,0 +1,59 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+
+version = "0.1-SNAPSHOT"
+group = "com.breskeby.gradle"
+
+sourceSets {
+    integTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
+repositories {
+    jcenter()
+}
+
+// Workaround for known ordering problem.
+// To get integtest working correctly in gradleTestKit() must be added before tooling api jar.
+//
+gradle.taskGraph.whenReady { graph ->
+    if(graph.hasTask(":idea")) {
+        dependencies {
+            compile gradleTestKit()
+        }
+    }
+}
+
+dependencies {
+	compile localGroovy()
+	compile gradleApi()
+    compile 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.0'
+    testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+    testCompile 'junit:junit:4.12'
+    integTestCompile gradleTestKit()
+
+}
+
+idea {
+    module {
+        testSourceDirs += sourceSets.integTest.groovy.srcDirs
+        testSourceDirs += sourceSets.integTest.resources.srcDirs
+        scopes.TEST.plus.add(configurations.integTestCompile)
+        scopes.TEST.plus.add(configurations.integTestRuntime)
+    }
+}
+
+
+task integTest(type:Test){
+    classpath = sourceSets.integTest.runtimeClasspath
+    testClassesDir = sourceSets.integTest.output.classesDir
+}
