@@ -71,6 +71,7 @@ idea {
 
 
 task integTest(type:Test){
+    shouldRunAfter test
     classpath = sourceSets.integTest.runtimeClasspath
     testClassesDir = sourceSets.integTest.output.classesDir
 }

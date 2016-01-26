@@ -4,7 +4,7 @@ env:
   - TERM=dumb
 
 script:
-  - ./gradlew clean build
+  - ./gradlew clean integTest build
 
 jdk:
   - openjdk7
